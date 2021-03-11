@@ -1,7 +1,17 @@
 <title>COS ePoster Submission Site</title>
+<style>
+.headimg {
+  display: block;
+  margin-left: 90px;
+  margin-right: auto;
+  width:90%;
+}
+</style>
+
 <div class="content">
     <div class="container">
-        <div class="row">
+    <div class=""><img class="img-fluid headimg card shadow-lg  mb-5  rounded" src="<?=base_url().'./upload_system_files/vendor/images/COS_banner_login.svg'?>" alt="Image" ></div><br><br><br><br>
+        <div class="row pt-5">
             <div class="col-md-6 order-md-2">
                 <img src="<?=base_url('upload_system_files/vendor/')?>images/undraw_filing_system_b5d2_with_cos_banner.svg" alt="Image" class="img-fluid">
             </div>
