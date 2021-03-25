@@ -87,7 +87,7 @@
 
                     $('#uploadedFiles').append('' +
                         '<li class="list-group-item">' +
-                        '<a href="https://docs.google.com/gview?url=<?=base_url()?>'+file.file_path+'&embedded=true" target="_blank"><button class="btn btn-sm btn-primary mr-3 text-white"><i class="fas fa-external-link-alt"></i> Open</button></a>' +
+                        '<a href="https://docs.google.com/gview?url=<?=base_url()?>'+file.file_path+'" target="_blank"><button class="btn btn-sm btn-primary mr-3 text-white"><i class="fas fa-external-link-alt"></i> Open</button></a>' +
                         '<a href="<?=base_url('admin/dashboard/openFile/')?>'+file.id+'" target="_blank"><button class="btn btn-sm btn-info mr-3"><i class="fas fa-save"></i> Download</button></a>' +
                         '<span class="uploaded-file-names badge badge-success"><i class="fas fa-clipboard-check"></i> '+file.name+' <span class="badge badge-info">'+Math.ceil(file.size/1000)+' kb</span></span>' +
                         '<!--<button class="delete-file-btn btn btn-sm btn-danger ml-3" presentation-id="'+file.presentation_id+'" user-id="'+file.presenter_id+'" file-id="'+file.id+'" file-name="'+file.name+'"><i class="fas fa-trash"></i> Delete</button>-->' +
