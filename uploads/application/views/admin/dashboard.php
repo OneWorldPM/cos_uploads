@@ -25,6 +25,7 @@
                     <th>Category</th>
                     <th>Presentation Title</th>
                     <th>Presenter</th>
+                    <th>Award</th>
                     <th>Info</th>
                     <th>Actions</th>
                 </tr>
@@ -139,6 +140,7 @@
                     '  <td>'+presentation.session_name+'</td>\n' +
                     '  <td>'+presentation.name+'</td>\n' +
                     '  <td>'+presentation.presenter_name+'</td>\n' +
+                    '  <td>'+presentation.award+'</td>\n' +
                     '  <td>\n' +
                     '    '+filesBtn+'\n' +
                     '    '+logsBtn+'\n' +
