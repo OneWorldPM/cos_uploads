@@ -167,6 +167,7 @@ class Dashboard extends CI_Controller
             'G'=>'Author.Email',
             'H'=>'Primary author',
             'I'=>'co-authors',
+            'J'=>'AWARD'
         );
 
         $required_column_names = array(
@@ -183,7 +184,8 @@ class Dashboard extends CI_Controller
             'first_name'=>'D',
             'last_name'=>'E',
             'session_name'=>'B',
-            'presentation_name'=>'C'
+            'presentation_name'=>'C',
+            'award'=>'J'
         );
 
         $admin_id = $_SESSION['user_id'];
@@ -225,7 +227,6 @@ class Dashboard extends CI_Controller
             }
         }
 
-
         foreach ($allowed_column_names as $columnIndex => $column_name)
         {
             /** @var array $header */
@@ -265,6 +266,13 @@ class Dashboard extends CI_Controller
             $presentation_name = str_replace('\'', "\`", $row_columns[$param_column_index['presentation_name']]);
             $created_date_time = date("Y-m-d H:i:s");
 
+            $award = 'null';
+            if (isset($row_columns[$param_column_index['award']]))
+            {
+                $award = ucfirst(str_replace('\'', "\`", $row_columns[$param_column_index['award']]));
+                $award = ($award == '')?'null':"'{$award}'";
+            }
+
             $exists = $this->checkDuplicate($email, $session_name, $presentation_name);
 
             if ($exists)
@@ -303,7 +311,7 @@ class Dashboard extends CI_Controller
                         $this->db->query("INSERT INTO `admin_logs`(`admin_id`, `log_name`, `log_desc`, `ref_presentation_id`, `other_ref`, `date_time`) VALUES ( '{$admin_id}', 'Ignored load item', '{$desc}', '{$presentationExists->id}', '{$presentationExists->presenter_id}', '{$created_date_time}')");
                         $duplicateRows = $duplicateRows+1;
                     }else{
-                        $this->db->query("INSERT INTO `presentations`(`name`, `session_id`, `presenter_id`, `created_on`) VALUES ('{$presentation_name}','{$session_id}','{$presenter_id}','{$created_date_time}')");
+                        $this->db->query("INSERT INTO `presentations`(`name`, `session_id`, `presenter_id`, `created_on`,`award`) VALUES ('{$presentation_name}','{$session_id}','{$presenter_id}','{$created_date_time}',".$award.")");
                         $presentation_id = $this->db->insert_id();
                         $this->db->query("INSERT INTO `admin_logs`(`admin_id`, `log_name`, `log_desc`, `ref_presentation_id`, `other_ref`, `date_time`) VALUES ( '{$admin_id}', 'Created presentation', null, '{$presentation_id}', null, '{$created_date_time}')");
                         $createdPresentations = $createdPresentations+1;
