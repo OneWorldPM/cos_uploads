@@ -131,6 +131,10 @@
                 let editBtn = '<button class="edit-presentation-btn btn btn-sm btn-primary text-white"><i class="fas fa-edit"></i> Edit</button>';
                 let disableBtn = (presentation.active==0)?'<button class="activate-presentation-btn btn btn-sm btn-success text-white mt-1" presentation-id="'+presentation.id+'"><i class="fas fa-check"></i> Activate</button>':'<button class="disable-presentation-btn btn btn-sm btn-danger text-white mt-1" presentation-id="'+presentation.id+'"><i class="fas fa-times"></i> Disable</button>';
 
+                var award = presentation.award;
+                if(award == null){
+                    award="";
+                }
                 $('#presentationTableBody').append('' +
                     '<tr>\n' +
                     '  <td>\n' +
@@ -140,7 +144,7 @@
                     '  <td>'+presentation.session_name+'</td>\n' +
                     '  <td>'+presentation.name+'</td>\n' +
                     '  <td>'+presentation.presenter_name+'</td>\n' +
-                    '  <td>'+presentation.award+'</td>\n' +
+                    '  <td>'+award+'</td>\n' +
                     '  <td>\n' +
                     '    '+filesBtn+'\n' +
                     '    '+logsBtn+'\n' +
