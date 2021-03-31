@@ -12,7 +12,7 @@
                     <div class="input-group">
 
                         <div class="custom-file">
-                            <input accept=".xlsx,.xlx,.csv" type="file" class="custom-file-input btn btn-outline-secondary" id="inputPresentationsFile" style="cursor: pointer;">
+                            <input accept=".xlsx,.xls" type="file" class="custom-file-input btn btn-outline-secondary" id="inputPresentationsFile" style="cursor: pointer;">
                             <label class="custom-file-label" for="inputPresentationsFile">Choose file</label>
                         </div>
 
@@ -21,7 +21,7 @@
                         </div>
 
                     </div>
-                    <small style="color: red;">Only .xlsx, .xls or .csv file are allowed.</small>
+                    <small style="color: red;">Only .xlsx or .xls file are allowed.</small>
 
                 </form>
 
@@ -35,6 +35,8 @@
 
 
 <script>
+
+    let supportedFiles = ['xlsx', 'xls']
 
     $(document).ready(function() {
         $('#inputPresentationsFile').on('change',function(){
@@ -52,6 +54,13 @@
             }
 
             let fileName = ($('#inputPresentationsFile').val()).replace(/^.*[\\\/]/, '');
+
+            let fileExtension = fileName.substr(fileName.lastIndexOf('.')+1);
+
+            if (!supportedFiles.includes(fileExtension)) {
+                toastr.error("File type "+fileExtension+" is not supported");
+                return false;
+            }
 
             Swal.fire({
                 title: 'Are you sure?',
