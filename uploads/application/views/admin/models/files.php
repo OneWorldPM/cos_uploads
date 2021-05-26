@@ -18,13 +18,19 @@
 
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item active" aria-current="page">Category: <span id="sessionName"></span></li>
+                        <li class="breadcrumb-item active" aria-current="page"><span class="category"></span> <span id="sessionName"></span></li>
                     </ol>
                 </nav>
 
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item active" aria-current="page">Presentation: <span id="presentationName"></span></li>
+                    </ol>
+                </nav>
+
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item active" aria-current="page">Label: <span id="presentationLabel"></span></li>
                     </ol>
                 </nav>
 
@@ -58,13 +64,21 @@
     });
 
 
-    function showFiles(user_id, presentation_id, session_name, presentation_name)
+    function showFiles(user_id, presentation_id, session_name, presentation_name, label)
     {
         fillUploadedFiles(user_id, presentation_id);
 
         $('#sessionName').text(session_name);
         $('#presentationName').text(presentation_name);
 
+        if(label == "Session Presentation" ){
+            $('.category').text('Session Title : ');
+        }
+        else{
+            $('.category').text('Category : ');
+        }
+
+        $('#presentationLabel').text(label);
 
         $('#filesModal').modal({ //Should not auto-close
             backdrop: 'static',

@@ -30,10 +30,11 @@ class Dashboard extends CI_Controller
     public function getPresentationList()
     {
 
-        $this->db->select("p.*, s.name as session_name, pr.presenter_id, CONCAT(pr.first_name, ' ', pr.last_name) as presenter_name");
+        $this->db->select("p.*, s.name as session_name, pr.presenter_id, CONCAT(pr.first_name, ' ', pr.last_name) as presenter_name, ul.name as label");
         $this->db->from('presentations p');
         $this->db->join('sessions s', 's.id = p.session_id');
         $this->db->join('presenter pr', 'pr.presenter_id = p.presenter_id');
+        $this->db->join('upload_label ul', 'p.label=ul.id', 'left');
         $this->db->order_by('p.created_on', 'DESC');
         $result = $this->db->get();
 
@@ -159,23 +160,28 @@ class Dashboard extends CI_Controller
 
         $allowed_column_names = array(
             'A'=>'Abstract.ControlNumber',
-            'B'=>'Topic.Topic1',
-            'C'=>'ePoster.Title',
+            'B'=>'Topic',
+            'C'=>'Title',
             'D'=>'Author.FirstName',
             'E'=>'Author.LastName',
             'F'=>'Author.Salutation',
             'G'=>'Author.Email',
             'H'=>'Primary author',
             'I'=>'co-authors',
-            'J'=>'AWARD'
+            'J'=>'AWARD',
+            'K'=>'Presentation.Date',
+            'L'=>'Presentation.StartTime',
+            'M'=>'Presentation.EndTime',
+            'N'=>'Label'
         );
 
         $required_column_names = array(
-            'B'=>'Topic.Topic1',
-            'C'=>'ePoster.Title',
+            'B'=>'Topic',
+            'C'=>'Title',
             'D'=>'Author.FirstName',
             'E'=>'Author.LastName',
-            'G'=>'Author.Email'
+            'G'=>'Author.Email',
+            'N'=>'Label'
         );
 
         $param_column_index = array(
@@ -185,7 +191,11 @@ class Dashboard extends CI_Controller
             'last_name'=>'E',
             'session_name'=>'B',
             'presentation_name'=>'C',
-            'award'=>'J'
+            'award'=>'J',
+            'presentation_date'=>'K',
+            'start_time'=>'L',
+            'end_time'=>'M',
+             'label'=>'N',
         );
 
         $admin_id = $_SESSION['user_id'];
@@ -245,6 +255,8 @@ class Dashboard extends CI_Controller
         /** @var array $rows */
         foreach ($rows as $row => $row_columns)
         {
+
+//            print_r(isset($row_columns['K'])?'hi':'no');exit;
             /** Empty column value catcher */
             foreach ($required_column_names as $columnIndex => $column_name)
             {
@@ -265,6 +277,42 @@ class Dashboard extends CI_Controller
             $session_name = str_replace('\'', "\`", $row_columns[$param_column_index['session_name']]);
             $presentation_name = str_replace('\'', "\`", $row_columns[$param_column_index['presentation_name']]);
             $created_date_time = date("Y-m-d H:i:s");
+            $label = str_replace('\'', "\`", $row_columns[$param_column_index['label']]);
+
+            if($label == 'ePoster')
+                $label = '1';
+
+            else if($label == 'Surgical Video')
+                $label = '2';
+
+            else if($label == 'Session Presentation')
+                $label = '3';
+            else{
+                $label = 'null';
+            }
+
+            $start_time = 'null';
+            $end_time = 'null';
+            $presentation_date = 'null';
+
+            if(isset($row_columns[$param_column_index['presentation_date']]))
+            {
+                $presentation_date = date('Y-m-d', PHPExcel_Shared_Date::ExcelToPHP(str_replace('\'', "\`", $row_columns[$param_column_index['presentation_date']])));
+                $presentation_date = ($presentation_date == '')? 'null':"'{$presentation_date}'";
+            }
+            if(isset($row_columns[$param_column_index['start_time']]))
+            {
+                $start_time = date('H:i:s', PHPExcel_Shared_Date::ExcelToPHP(str_replace('\'', "\`", $row_columns[$param_column_index['start_time']])));
+                $start_time = date('H:i:s', strtotime('-2 hours', strtotime($start_time)));
+                $start_time = ($start_time == '')?'null': "'{$start_time}'";
+             }
+            if(isset($row_columns[$param_column_index['end_time']]))
+            {
+                $end_time = date('H:i:s', PHPExcel_Shared_Date::ExcelToPHP(str_replace('\'', "\`", $row_columns[$param_column_index['end_time']])));
+                $end_time = date('H:i:s', strtotime('-2 hours', strtotime($end_time)));
+                $end_time = ($end_time == '')?'null': "'{$end_time}'";
+
+            }
 
             $award = 'null';
             if (isset($row_columns[$param_column_index['award']]))
@@ -311,7 +359,7 @@ class Dashboard extends CI_Controller
                         $this->db->query("INSERT INTO `admin_logs`(`admin_id`, `log_name`, `log_desc`, `ref_presentation_id`, `other_ref`, `date_time`) VALUES ( '{$admin_id}', 'Ignored load item', '{$desc}', '{$presentationExists->id}', '{$presentationExists->presenter_id}', '{$created_date_time}')");
                         $duplicateRows = $duplicateRows+1;
                     }else{
-                        $this->db->query("INSERT INTO `presentations`(`name`, `session_id`, `presenter_id`, `created_on`,`award`) VALUES ('{$presentation_name}','{$session_id}','{$presenter_id}','{$created_date_time}',".$award.")");
+                        $this->db->query("INSERT INTO `presentations`(`name`, `session_id`, `presenter_id`, `created_on`,`award`, `label`, `presentation_date`, `start_time`, `end_time`) VALUES ('{$presentation_name}','{$session_id}','{$presenter_id}','{$created_date_time}',".$award.", '{$label}', ".$presentation_date.", ".$start_time.", ".$end_time.")");
                         $presentation_id = $this->db->insert_id();
                         $this->db->query("INSERT INTO `admin_logs`(`admin_id`, `log_name`, `log_desc`, `ref_presentation_id`, `other_ref`, `date_time`) VALUES ( '{$admin_id}', 'Created presentation', null, '{$presentation_id}', null, '{$created_date_time}')");
                         $createdPresentations = $createdPresentations+1;
@@ -404,5 +452,16 @@ class Dashboard extends CI_Controller
 
         return false;
     }
+
+//    private function check_upload_label($label){
+//        $this->db->select('*')
+//            ->from('upload_label')
+//            ->where('name', $label)
+//            ;
+//        $result = $this->db->get();
+//        if($result->num_rows() > 0){
+//            return $result->result()[0];
+//        }
+//    }
 
 }

@@ -25,6 +25,8 @@
                     <th>Category</th>
                     <th>Presentation Title</th>
                     <th>Presenter</th>
+                    <th style=" white-space: nowrap ">Label</th>
+                    <th style=" white-space: nowrap ">Date | Time</th>
                     <th>Award</th>
                     <th>Info</th>
                     <th>Actions</th>
@@ -67,8 +69,9 @@
             let presentation_id = $(this).attr('presentation-id');
             let presentation_name = $(this).attr('presentation-name');
             let session_name = $(this).attr('session-name');
+            let label = $(this).attr('data-label');
 
-            showFiles(user_id, presentation_id, session_name, presentation_name);
+            showFiles(user_id, presentation_id, session_name, presentation_name, label);
         });
 
         $('#presentationTable').on('click', '.details-btn', function () {
@@ -77,8 +80,9 @@
             let presentation_id = $(this).attr('presentation-id');
             let presentation_name = $(this).attr('presentation-name');
             let session_name = $(this).attr('session-name');
+            let label = $(this).attr('data-label');
 
-            showUploader(user_id, presentation_id, session_name, presentation_name);
+            showUploader(user_id, presentation_id, session_name, presentation_name, label);
         });
 
         $('#presentationTable').on('click', '.activate-presentation-btn', function () {
@@ -122,14 +126,33 @@
             $('#presentationTableBody').html('');
             $.each(response.data, function(i, presentation) {
 
+
                 let statusBadge = (presentation.uploadStatus)?'<span class="badge badge-success mr-1"><i class="fas fa-check-circle"></i> '+presentation.uploadStatus+' File(s) uploaded</span>':'<span class="badge badge-warning mr-1"><i class="fas fa-exclamation-circle"></i> No Uploads</span>';
                 statusBadge += (presentation.active==1)?'<span class="active-status badge badge-success" presentation-id="'+presentation.id+'"><i class="fas fa-check"></i> Active</span>':'<span class="disabled-status badge badge-danger" presentation-id="'+presentation.id+'"><i class="fas fa-times"></i> Disabled</span>';
 
-                let filesBtn = '<button class="files-btn btn btn-sm btn-info text-white" session-name="'+presentation.session_name+'" presentation-name="'+presentation.name+'" user-id="'+presentation.presenter_id+'" presentation-id="'+presentation.id+'"><i class="fas fa-folder-open"></i> Files</button>';
+                let filesBtn = '<button class="files-btn btn btn-sm btn-info text-white" session-name="'+presentation.session_name+'" presentation-name="'+presentation.name+'" user-id="'+presentation.presenter_id+'" presentation-id="'+presentation.id+'" data-label="'+presentation.label+'"><i class="fas fa-folder-open"></i> Files</button>';
                 let logsBtn = '<button class="presentation-logs-btn btn btn-sm btn-warning text-white mt-1" session-name="'+presentation.session_name+'" presentation-name="'+presentation.name+'" user-id="<?=$this->session->userdata('user_id')?>" presentation-id="'+presentation.id+'"><i class="fas fa-history"></i> Logs</button>';
 
                 let editBtn = '<button class="edit-presentation-btn btn btn-sm btn-primary text-white"><i class="fas fa-edit"></i> Edit</button>';
                 let disableBtn = (presentation.active==0)?'<button class="activate-presentation-btn btn btn-sm btn-success text-white mt-1" presentation-id="'+presentation.id+'"><i class="fas fa-check"></i> Activate</button>':'<button class="disable-presentation-btn btn btn-sm btn-danger text-white mt-1" presentation-id="'+presentation.id+'"><i class="fas fa-times"></i> Disable</button>';
+
+                var label = presentation.label;
+                if(label !== null){
+                     label = '<div class="badge badge-info" >'+presentation.label+'</div>';
+                }else{
+                     label = '';
+                }
+
+                if(presentation.presentation_date !== null){
+                    presentation_date = presentation.presentation_date;
+                }else{
+                    presentation_date ='';
+                }
+                if(presentation.start_time !== null && presentation.end_time !== null){
+                    presentation_time = presentation.start_time+'-'+presentation.end_time;
+                }else{
+                    presentation_time = '';
+                }
 
                 var award = presentation.award;
                 if(award == null){
@@ -144,6 +167,8 @@
                     '  <td>'+presentation.session_name+'</td>\n' +
                     '  <td>'+presentation.name+'</td>\n' +
                     '  <td>'+presentation.presenter_name+'</td>\n' +
+                    '  <td style="white-space: nowrap">'+label+'</td>\n' +
+                    '  <td style="white-space: nowrap">'+presentation_date+'<br>'+presentation_time+'</td>\n' +
                     '  <td>'+award+'</td>\n' +
                     '  <td>\n' +
                     '    '+filesBtn+'\n' +

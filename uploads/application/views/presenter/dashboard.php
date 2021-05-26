@@ -62,6 +62,9 @@
                     <th>Status</th>
                     <th>Category</th>
                     <th>Presentation Title</th>
+                    <th>Label</th>
+                    <th>Presentation Date</th>
+                    <th>Time</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
@@ -102,8 +105,12 @@
             let presentation_id = $(this).attr('presentation-id');
             let presentation_name = $(this).attr('presentation-name');
             let session_name = $(this).attr('session-name');
+            let presentation_type = $(this).attr('data-presentation_type');
+            let speaker_lname = $(this).attr('speaker_lname');
+            let session_id = $(this).attr('session_id');
+            let label = $(this).attr('data-label');
 
-            showUploader(user_id, presentation_id, session_name, presentation_name);
+            showUploader(user_id, presentation_id, session_name, presentation_name, presentation_type, speaker_lname, session_id, label);
         });
 
         $('#presentationTable').on('click', '.details-btn', function () {
@@ -112,8 +119,12 @@
             let presentation_id = $(this).attr('presentation-id');
             let presentation_name = $(this).attr('presentation-name');
             let session_name = $(this).attr('session-name');
+            let presentation_type = $(this).attr('data-presentation_type');
+            let speaker_lname = $(this).attr('speaker_lname');
+            let session_id = $(this).attr('session_id');
+            let label = $(this).attr('data-label');
 
-            showUploader(user_id, presentation_id, session_name, presentation_name);
+            showUploader(user_id, presentation_id, session_name, presentation_name, presentation_type, speaker_lname, session_id, label);
         });
 
 
@@ -135,8 +146,13 @@
             $.each(response.data, function(i, presentation) {
 
                 let statusBadge = (presentation.uploadStatus)?'<span class="badge badge-success"><i class="fas fa-check-circle"></i> '+presentation.uploadStatus+' File(s) uploaded</span>':'<span class="badge badge-warning"><i class="fas fa-exclamation-circle"></i> No Uploads</span>';
-                let uploadBtn = '<button class="upload-btn btn btn-sm btn-info" session-name="'+presentation.session_name+'" presentation-name="'+presentation.name+'" user-id="<?=$this->session->userdata('user_id')?>" presentation-id="'+presentation.id+'"><i class="fas fa-upload"></i> Upload</button>';
-                let detailsBtn = '<button class="details-btn btn btn-sm btn-primary text-white" session-name="'+presentation.session_name+'" presentation-name="'+presentation.name+'" user-id="<?=$this->session->userdata('user_id')?>" presentation-id="'+presentation.id+'"><i class="fas fa-info-circle"></i> Details</button>';
+                let uploadBtn = '<button class="upload-btn btn btn-sm btn-info" session-name="'+presentation.session_name+'" presentation-name="'+presentation.name+'" user-id="<?=$this->session->userdata('user_id')?>" presentation-id="'+presentation.id+'" data-presentation_type="'+presentation.label+'" session_id="'+presentation.session_id+'" speaker_lname="'+presentation.speaker_lname+'"  data-label="'+presentation.label+'"><i class="fas fa-upload"></i> Upload</button>';
+                let detailsBtn = '<button class="details-btn btn btn-sm btn-primary text-white" session-name="'+presentation.session_name+'" presentation-name="'+presentation.name+'" user-id="<?=$this->session->userdata('user_id')?>" presentation-id="'+presentation.id+'" data-presentation_type="'+presentation.label+'" session_id="'+presentation.session_id+'" speaker_lname="'+presentation.speaker_lname+'"  data-label="'+presentation.label+'"><i class="fas fa-info-circle"></i> Details</button>';
+
+                let label = '<div class="badge badge-info" >'+presentation.label+'</div>';
+                var presentation_date = (presentation.presentation_date && presentation.presentation_date !=='0000-00-00')?presentation.presentation_date:"";
+
+               let time = (presentation.start_time !== null  && presentation.end_time !== null ) ? '<div class="badge badge-primary text-white" style="font-size:16px">'+presentation.start_time +'</div> - <div class="badge badge-primary text-white" style="font-size:16px">'+ presentation.end_time +'</div>':'';
 
                 $('#presentationTableBody').append('' +
                     '<tr>\n' +
@@ -145,6 +161,9 @@
                     '  </td>\n' +
                     '  <td>'+presentation.session_name+'</td>\n' +
                     '  <td>'+presentation.name+'</td>\n' +
+                    '  <td>'+label+'</td>\n' +
+                    '  <td>'+presentation_date+'</td>\n' +
+                    '  <td style="white-space:nowrap">'+time+'</td>\n' +
                     '  <td>\n' +
                     '    '+uploadBtn+'\n' +
                     '    '+detailsBtn+'\n' +

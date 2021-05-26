@@ -30,12 +30,15 @@ class Dashboard extends CI_Controller
     {
         $user_id = $this->session->userdata('user_id');
 
-        $this->db->select('p.*, s.name as session_name');
+        $this->db->select('p.*, s.name as session_name, ul.name as label, pr.last_name as speaker_lname');
         $this->db->from('presentations p');
         $this->db->join('sessions s', 's.id = p.session_id');
+        $this->db->join('upload_label ul', 'p.label = ul.id');
+        $this->db->join('presenter pr', 'p.presenter_id=pr.presenter_id', 'left');
         $this->db->where("p.presenter_id ", $user_id);
         $this->db->where("p.active ", 1);
         $this->db->order_by('p.created_on', 'DESC');
+
         $result = $this->db->get();
 
         if ($result->num_rows() > 0)
@@ -53,6 +56,8 @@ class Dashboard extends CI_Controller
 
     public function uploadFile()
     {
+        $post = $this->input->post();
+
         ini_set('set_time_limit', '3600');
         ini_set('max_execution_time',3600);
         ini_set('max_input_time','500');
@@ -102,6 +107,7 @@ class Dashboard extends CI_Controller
             $size = $_FILES['file']['size'];
             $type = $_FILES['file']['type'];
             $extension = pathinfo($_FILES['file']['name'], PATHINFO_EXTENSION);
+            $filename = pathinfo($_FILES['file']['name'], PATHINFO_FILENAME);
 
             $upload_file_name = $unique_str.'.'.$extension;
 
@@ -113,8 +119,17 @@ class Dashboard extends CI_Controller
 
                 $file_path = 'upload_system_files/doc_upload/'.$user.'/'.$upload_file_name;
 
+                $new_name = $post['session_id'].'_'.$post['speaker_lname'].'_'.$filename;
+
+                if($this->check_upload_resubmission($presentation_id, $user, $new_name)){
+                    $increment_name = $this->check_upload_resubmission($presentation_id, $user, $new_name);
+                    $new_name= $increment_name.'.'.$extension;
+                }else{
+                    $new_name = $post['session_id'].'_'.$post['speaker_lname'].'_'.$name;
+                }
+
                 $upload = array(
-                    'name' => $name,
+                    'name' =>$new_name,
                     'format' => $type,
                     'extension' => $extension,
                     'size' => $size,
@@ -123,6 +138,7 @@ class Dashboard extends CI_Controller
                     'presenter_id' => $user,
                     "uploaded_date_time" => date("Y-m-d H:i:s")
                 );
+
                 $this->db->insert("uploads", $upload);
 
                 if ($this->db->affected_rows() > 0)
@@ -148,6 +164,24 @@ class Dashboard extends CI_Controller
 
         return;
 
+    }
+
+     function check_upload_resubmission($presentation_id, $user, $new_name){
+
+        $result = $this->db->query("SELECT COUNT(*) as count FROM uploads WHERE presentation_id='".$presentation_id."' and presenter_id = '".$user."' and  name REGEXP '".$new_name."' ");
+
+            if ($result->num_rows() > 0) {
+
+                if($result->result()[0]->count > 0){
+                    $count = $result->result()[0]->count + 1;
+                    return $new_name.'('.$count.')';
+                }else{
+                    return false;
+                }
+
+            }else{
+                return false;
+            }
     }
 
     public function deleteFile()
