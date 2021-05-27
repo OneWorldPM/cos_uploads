@@ -12,19 +12,24 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="uploadModalLabel">Upload Files</h5>
+                <h5 class="modal-title" id="uploadModalLabel" > Upload Files </h5>
             </div>
             <div class="modal-body">
 
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item active" aria-current="page">Category: <span id="sessionName"></span></li>
+                        <li class="breadcrumb-item active" aria-current="page"><span class="category"></span> <span id="sessionName"></span></li>
                     </ol>
                 </nav>
 
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item active" aria-current="page">Presentation: <span id="presentationName"></span></li>
+                    </ol>
+                </nav>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item active" aria-current="page">Label: <span id="presentationLabel"></span></li>
                     </ol>
                 </nav>
 
@@ -37,7 +42,7 @@
 
                 <section class="mt-3" id="existingFilesSection">
                     <div>
-                        <h5 class="modal-title">Uploaded Files</h5>
+                        <h5 class="modal-title">Uploaded Files </h5>
                     </div>
                     <div class="text-center" id="uploadedFiles" style="border: 1px solid #9f9f9f52;">
                         <img src="<?=base_url('upload_system_files/vendor/images/ycl_anime_500kb.gif')?>">
@@ -140,12 +145,23 @@
     });
 
 
-    function showUploader(user_id, presentation_id, session_name, presentation_name)
+    function showUploader(user_id, presentation_id, session_name, presentation_name, presentation_type, speaker_lname, session_id, label)
     {
+
         fillUploadedFiles(user_id, presentation_id);
 
         $('#sessionName').text(session_name);
         $('#presentationName').text(presentation_name);
+        $('.presentation_type').text(presentation_type);
+        if(label == "Session Presentation" ){
+            $('.category').text('Session Title : ');
+        }
+        else{
+            $('.category').text('Category : ');
+        }
+
+        $('#presentationLabel').text(label);
+
 
         let form = '' +
             '<form method="post" class="dropzone">' +
@@ -173,6 +189,8 @@
         uploadDropzone.on('sending', function(file, xhr, formData){
             formData.append('user_id', user_id);
             formData.append('presentation_id', presentation_id);
+            formData.append('speaker_lname', speaker_lname);
+            formData.append('session_id', session_id);
         });
 
         uploadDropzone.on('success', function() {
