@@ -297,19 +297,17 @@ class Dashboard extends CI_Controller
 
             if(isset($row_columns[$param_column_index['presentation_date']]))
             {
-                $presentation_date = date('Y-m-d', PHPExcel_Shared_Date::ExcelToPHP(str_replace('\'', "\`", $row_columns[$param_column_index['presentation_date']])));
+                $presentation_date = gmdate('Y-m-d', PHPExcel_Shared_Date::ExcelToPHP(str_replace('\'', "\`", $row_columns[$param_column_index['presentation_date']])));
                 $presentation_date = ($presentation_date == '')? 'null':"'{$presentation_date}'";
             }
             if(isset($row_columns[$param_column_index['start_time']]))
             {
-                $start_time = date('H:i:s', PHPExcel_Shared_Date::ExcelToPHP(str_replace('\'', "\`", $row_columns[$param_column_index['start_time']])));
-                $start_time = date('H:i:s', strtotime('-2 hours', strtotime($start_time)));
+                $start_time = gmdate('H:i:s', PHPExcel_Shared_Date::ExcelToPHP(str_replace('\'', "\`", $row_columns[$param_column_index['start_time']])));
                 $start_time = ($start_time == '')?'null': "'{$start_time}'";
              }
             if(isset($row_columns[$param_column_index['end_time']]))
             {
-                $end_time = date('H:i:s', PHPExcel_Shared_Date::ExcelToPHP(str_replace('\'', "\`", $row_columns[$param_column_index['end_time']])));
-                $end_time = date('H:i:s', strtotime('-2 hours', strtotime($end_time)));
+                $end_time = gmdate('H:i:s', PHPExcel_Shared_Date::ExcelToPHP(str_replace('\'', "\`", $row_columns[$param_column_index['end_time']])));
                 $end_time = ($end_time == '')?'null': "'{$end_time}'";
 
             }
