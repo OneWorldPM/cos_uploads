@@ -14,7 +14,7 @@
             </div>
 
         </div>
-
+        <a href="<?=base_url().'admin/dashboard/presentationToCsv'?>" target="_blank" class="btn btn-primary float-left mb-2 ml-5 text-white" style="cursor: pointer"><i class="fas fa-file-csv"></i> Export CSV</a>
         <div class="col-md-12">
             <button class="create-presentation-btn btn btn-success float-right"><i class="fas fa-plus"></i> Create</button>
             <table id="presentationTable" class="table table-striped table-bordered" style="width:100%">

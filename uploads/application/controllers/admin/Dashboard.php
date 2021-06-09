@@ -462,4 +462,51 @@ class Dashboard extends CI_Controller
 //        }
 //    }
 
+    public function presentationToCsv(){
+        $this->db->select('p.id,CONCAT(pr.first_name ," ", pr.last_name) as PresenterName, l.name as LabelName, s.name as Category, p.name as PresentationName')
+            ->from('presentations p ')
+            ->join('upload_label l', 'p.label=l.id', 'left')
+            ->join('sessions s', 'p.session_id = s.id', 'left')
+            ->join('presenter pr', 'p.presenter_id = pr.presenter_id', 'left')
+            ;
+        $result = $this->db->get();
+
+        if($result->num_rows() > 0){
+            $filename = 'PresentationExport'.date('Y-m-d').'.csv';
+
+            header("Content-Description: File Transfer");
+            header("Content-Disposition: attachment; filename = $filename");
+            header("Content-Type: application/csv;");
+
+            $file = fopen('php://output', 'w');
+            $header = array("id", "Presenter", "Label", "Category", "Presentation Title", "Status");
+            fputcsv($file, $header);
+            $data_array= array();
+            foreach($result->result_array() as $data){
+                $data['get_uploads'] = $this->get_uploads($data['id']);
+                fputcsv($file, $data);
+            }
+            fclose($file);
+            exit;
+        }else{
+            return '';
+        }
+
+    }
+
+    function get_uploads($presentation_id){
+        $this->db->select('count(*) as count')
+            ->from('uploads')
+            ->where('presentation_id', $presentation_id)
+            ;
+        $result = $this->db->get();
+        if($result->num_rows() > 0){
+            if($result->result()[0]->count <= 0 ){
+                return 'No Data/File uploaded';
+            }else{
+                return $result->result()[0]->count.' Data/File uploaded';
+            }
+
+        }
+    }
 }
