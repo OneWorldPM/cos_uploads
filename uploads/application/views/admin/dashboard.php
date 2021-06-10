@@ -25,6 +25,7 @@
                     <th>Category</th>
                     <th>Presentation Title</th>
                     <th>Presenter</th>
+                    <th>Email</th>
                     <th style=" white-space: nowrap ">Label</th>
                     <th style=" white-space: nowrap ">Date | Time</th>
                     <th>Award</th>
@@ -167,6 +168,7 @@
                     '  <td>'+presentation.session_name+'</td>\n' +
                     '  <td>'+presentation.name+'</td>\n' +
                     '  <td>'+presentation.presenter_name+'</td>\n' +
+                    '  <td style="width: 200px !important; word-break:break-word">'+presentation.email+'</td>\n' +
                     '  <td style="white-space: nowrap">'+label+'</td>\n' +
                     '  <td style="white-space: nowrap">'+presentation_date+'<br>'+presentation_time+'</td>\n' +
                     '  <td>'+award+'</td>\n' +
@@ -187,7 +189,8 @@
                     $(this.api().table().container()).find('input').attr('type', 'text');
                     $(this.api().table().container()).find('input').val('upload');
                     //$(this.api().table().container()).find('input').val('');
-                }
+                },
+
             });
 
             $('#lastUpdated').text(formatDateTime(response.data[0].created_on, false));
