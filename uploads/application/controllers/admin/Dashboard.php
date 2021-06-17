@@ -463,7 +463,7 @@ class Dashboard extends CI_Controller
 //    }
 
     public function presentationToCsv(){
-        $this->db->select('p.id,CONCAT(pr.first_name ," ", pr.last_name) as PresenterName, l.name as LabelName, s.name as Category, p.name as PresentationName')
+        $this->db->select('p.id,CONCAT(pr.first_name ," ", pr.last_name) as PresenterName, pr.email as email, l.name as LabelName, s.name as Category, p.name as PresentationName')
             ->from('presentations p ')
             ->join('upload_label l', 'p.label=l.id', 'left')
             ->join('sessions s', 'p.session_id = s.id', 'left')
@@ -479,7 +479,7 @@ class Dashboard extends CI_Controller
             header("Content-Type: application/csv;");
 
             $file = fopen('php://output', 'w');
-            $header = array("id", "Presenter", "Label", "Category", "Presentation Title", "Status");
+            $header = array("id", "Presenter", "Email", "Label", "Category", "Presentation Title", "Status");
             fputcsv($file, $header);
             $data_array= array();
             foreach($result->result_array() as $data){
