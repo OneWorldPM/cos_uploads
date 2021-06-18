@@ -1,4 +1,4 @@
-<title>Admin - COS ePoster Submission Site</title>
+<title>Admin - COS ePoster and Presentation Submission Site</title>
 
 <main role="main" style="margin-top: 70px;margin-left: 20px;margin-right: 20px;">
     <div class="row">
@@ -67,6 +67,12 @@
             let templateId = $(this).attr('template-id');
             let templateSubject = $(this).attr('template-subject');
             sendEmailToAll(templateId, templateSubject);
+        });
+
+        $('#emailTemplatesTable').on('click', '.email-sendtoallAwardNo-btn', function () {
+            let templateId = $(this).attr('template-id');
+            let templateSubject = $(this).attr('template-subject');
+            sendEmailToAllAwardNo(templateId, templateSubject);
         });
 
         $('#emailTemplatesTable').on('click', '.logs-email-template', function () {
@@ -139,6 +145,7 @@
                 let removeButton = '<button class="remove-email-template btn btn-danger ml-3" template-id="'+template.id+'" template-subject="'+template.subject+'"><i class="fas fa-trash"></i> Remove</button>';
 
                 let sendToAllButton = '<button class="email-sendtoall-btn btn btn-warning text-white" template-id="'+template.id+'" template-subject="'+template.subject+'"><i class="fas fa-mail-bulk"></i> Send to all</button>';
+                let sendToAllAwardNoButton = '<button class="email-sendtoallAwardNo-btn btn btn-warning text-white" template-id="'+template.id+'" template-subject="'+template.subject+'"><i class="fas fa-mail-bulk"></i> Send to All Award No</button>';
                 let sendToCustomEmailButton = '<button class="email-sendtocustom-btn btn btn-warning text-white" template-id="'+template.id+'" template-subject="'+template.subject+'"><i class="fas fa-at"></i> Send to custom email</button>';
 
                 $('#emailTemplatesTableBody').append('' +
@@ -156,6 +163,7 @@
                    '  <td>\n' +
                    '   '+sendToAllButton+'\n' +
                    '   '+sendToCustomEmailButton+'\n' +
+                    '  '+sendToAllAwardNoButton+'\n' +
                    '  </td>\n' +
                    '</tr>');
             });

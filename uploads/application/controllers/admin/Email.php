@@ -27,6 +27,7 @@ class Email extends CI_Controller
 
         $this->load->view('admin/models/email-to-custom');
         $this->load->view('admin/models/email-to-all');
+        $this->load->view('admin/models/email-to-all-award-no');
 
         $this->load->view('admin/foot');
     }
@@ -325,4 +326,117 @@ class Email extends CI_Controller
 
         return;
     }
+
+
+    public function sendToAllAwardNo()
+    {
+        $post = $this->input->post();
+        $template_id = $post['templateId'];
+        $subject = $post['subject'];
+        $content = $post['content'];
+
+        $emailList = $this->getAllAwardNoEmails();
+        $this->load->config('email', TRUE);
+
+        if (!$this->config->item('smtp_user', 'email'))
+        {
+            $response = array(
+                'status' => 'failed',
+                'msg' => "Send email option is not configured, please contact system administrator."
+            );
+
+            echo json_encode($response);
+
+            return;
+        }
+
+        $config = Array(
+            'protocol' => $this->config->item('protocol', 'email'),
+            'smtp_host' => $this->config->item('smtp_host', 'email'),
+            'smtp_port' => $this->config->item('smtp_port', 'email'),
+            'smtp_user' => $this->config->item('smtp_user', 'email'),
+            'smtp_pass' => $this->config->item('smtp_pass', 'email'),
+            'mailtype'  => $this->config->item('mailtype', 'email'),
+            'charset'   => $this->config->item('charset', 'email')
+        );
+        $this->load->library('email', $config);
+
+        $this->email->from('presentations@yourconference.live', 'COS ePoster Submission');
+        $this->email->to('presentations@yourconference.live');
+        //$this->email->cc('athullive@gmail.com');
+        $this->email->bcc($emailList);
+
+        $this->email->subject($subject);
+
+        /** Get email template */
+        $url = base_url()."upload_system_files/email_templates/common_template.php";
+        $fields = array(
+            'content'=>$content);
+        $fields_string = http_build_query($fields);
+        $ch = curl_init();
+        curl_setopt($ch,CURLOPT_URL, $url);
+        curl_setopt($ch,CURLOPT_POST, true);
+        curl_setopt($ch,CURLOPT_POSTFIELDS, $fields_string);
+        curl_setopt($ch,CURLOPT_RETURNTRANSFER, true);
+        $email_body = curl_exec($ch);
+
+        $this->email->message($email_body);
+
+        // If the domain is localhost then save $email_body to a file/append every email
+        // Else send email
+        $result = $this->email->send();
+//            $result=1;
+        if ($result)
+        {
+            $this->Admin_Logger->log("Sent bulk email", json_encode($emailList), null, $template_id);
+            $response = array(
+                'status' => 'success',
+                'msg' => "Email was sent!"
+            );
+            echo json_encode($response);
+        }else{
+
+            $response = array(
+                'status' => 'failed',
+                'msg' => "Unable to send email!"
+            );
+
+            echo json_encode($response);
+        }
+
+        return;
+    }
+
+    public function getAllAwardNoEmails($print=false)
+    {
+        $this->db->select("email,ps.presenter_id");
+        $this->db->from('presenter pr');
+        $this->db->join('presentations ps','pr.presenter_id=ps.presenter_id');
+        $this->db->where('ps.award=','No');
+        //$this->db->where_in('presenter_id', array(81, 79, 78));
+        $result = $this->db->get();
+        $emails =array();
+        if ($result->num_rows() > 0)
+        {
+            foreach ($result->result() as $row)
+                $emails[] = $row->email;
+
+            if ($print)
+            {
+                echo json_encode($emails);
+                return;
+            }else{
+                return $emails;
+            }
+        } else {
+            if ($print)
+            {
+                echo json_encode(array());
+                return;
+            }else{
+                return array();
+            }
+        }
+    }
+
 }

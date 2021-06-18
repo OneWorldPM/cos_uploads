@@ -30,10 +30,11 @@ class Dashboard extends CI_Controller
     public function getPresentationList()
     {
 
-        $this->db->select("p.*, s.name as session_name, pr.presenter_id, CONCAT(pr.first_name, ' ', pr.last_name) as presenter_name");
+        $this->db->select("p.*, s.name as session_name, pr.presenter_id, CONCAT(pr.first_name, ' ', pr.last_name) as presenter_name, ul.name as label, pr.email as email");
         $this->db->from('presentations p');
         $this->db->join('sessions s', 's.id = p.session_id');
         $this->db->join('presenter pr', 'pr.presenter_id = p.presenter_id');
+        $this->db->join('upload_label ul', 'p.label=ul.id', 'left');
         $this->db->order_by('p.created_on', 'DESC');
         $result = $this->db->get();
 
@@ -159,22 +160,28 @@ class Dashboard extends CI_Controller
 
         $allowed_column_names = array(
             'A'=>'Abstract.ControlNumber',
-            'B'=>'Topic.Topic1',
-            'C'=>'ePoster.Title',
+            'B'=>'Topic',
+            'C'=>'Title',
             'D'=>'Author.FirstName',
             'E'=>'Author.LastName',
             'F'=>'Author.Salutation',
             'G'=>'Author.Email',
             'H'=>'Primary author',
             'I'=>'co-authors',
+            'J'=>'AWARD',
+            'K'=>'Presentation.Date',
+            'L'=>'Presentation.StartTime',
+            'M'=>'Presentation.EndTime',
+            'N'=>'Label'
         );
 
         $required_column_names = array(
-            'B'=>'Topic.Topic1',
-            'C'=>'ePoster.Title',
+            'B'=>'Topic',
+            'C'=>'Title',
             'D'=>'Author.FirstName',
             'E'=>'Author.LastName',
-            'G'=>'Author.Email'
+            'G'=>'Author.Email',
+            'N'=>'Label'
         );
 
         $param_column_index = array(
@@ -183,7 +190,12 @@ class Dashboard extends CI_Controller
             'first_name'=>'D',
             'last_name'=>'E',
             'session_name'=>'B',
-            'presentation_name'=>'C'
+            'presentation_name'=>'C',
+            'award'=>'J',
+            'presentation_date'=>'K',
+            'start_time'=>'L',
+            'end_time'=>'M',
+             'label'=>'N',
         );
 
         $admin_id = $_SESSION['user_id'];
@@ -225,7 +237,6 @@ class Dashboard extends CI_Controller
             }
         }
 
-
         foreach ($allowed_column_names as $columnIndex => $column_name)
         {
             /** @var array $header */
@@ -244,6 +255,8 @@ class Dashboard extends CI_Controller
         /** @var array $rows */
         foreach ($rows as $row => $row_columns)
         {
+
+//            print_r(isset($row_columns['K'])?'hi':'no');exit;
             /** Empty column value catcher */
             foreach ($required_column_names as $columnIndex => $column_name)
             {
@@ -264,6 +277,47 @@ class Dashboard extends CI_Controller
             $session_name = str_replace('\'', "\`", $row_columns[$param_column_index['session_name']]);
             $presentation_name = str_replace('\'', "\`", $row_columns[$param_column_index['presentation_name']]);
             $created_date_time = date("Y-m-d H:i:s");
+            $label = str_replace('\'', "\`", $row_columns[$param_column_index['label']]);
+
+            if($label == 'ePoster')
+                $label = '1';
+
+            else if($label == 'Surgical Video')
+                $label = '2';
+
+            else if($label == 'Session Presentation')
+                $label = '3';
+            else{
+                $label = 'null';
+            }
+
+            $start_time = 'null';
+            $end_time = 'null';
+            $presentation_date = 'null';
+
+            if(isset($row_columns[$param_column_index['presentation_date']]))
+            {
+                $presentation_date = gmdate('Y-m-d', PHPExcel_Shared_Date::ExcelToPHP(str_replace('\'', "\`", $row_columns[$param_column_index['presentation_date']])));
+                $presentation_date = ($presentation_date == '')? 'null':"'{$presentation_date}'";
+            }
+            if(isset($row_columns[$param_column_index['start_time']]))
+            {
+                $start_time = gmdate('H:i:s', PHPExcel_Shared_Date::ExcelToPHP(str_replace('\'', "\`", $row_columns[$param_column_index['start_time']])));
+                $start_time = ($start_time == '')?'null': "'{$start_time}'";
+             }
+            if(isset($row_columns[$param_column_index['end_time']]))
+            {
+                $end_time = gmdate('H:i:s', PHPExcel_Shared_Date::ExcelToPHP(str_replace('\'', "\`", $row_columns[$param_column_index['end_time']])));
+                $end_time = ($end_time == '')?'null': "'{$end_time}'";
+
+            }
+
+            $award = 'null';
+            if (isset($row_columns[$param_column_index['award']]))
+            {
+                $award = ucfirst(str_replace('\'', "\`", $row_columns[$param_column_index['award']]));
+                $award = ($award == '')?'null':"'{$award}'";
+            }
 
             $exists = $this->checkDuplicate($email, $session_name, $presentation_name);
 
@@ -303,7 +357,7 @@ class Dashboard extends CI_Controller
                         $this->db->query("INSERT INTO `admin_logs`(`admin_id`, `log_name`, `log_desc`, `ref_presentation_id`, `other_ref`, `date_time`) VALUES ( '{$admin_id}', 'Ignored load item', '{$desc}', '{$presentationExists->id}', '{$presentationExists->presenter_id}', '{$created_date_time}')");
                         $duplicateRows = $duplicateRows+1;
                     }else{
-                        $this->db->query("INSERT INTO `presentations`(`name`, `session_id`, `presenter_id`, `created_on`) VALUES ('{$presentation_name}','{$session_id}','{$presenter_id}','{$created_date_time}')");
+                        $this->db->query("INSERT INTO `presentations`(`name`, `session_id`, `presenter_id`, `created_on`,`award`, `label`, `presentation_date`, `start_time`, `end_time`) VALUES ('{$presentation_name}','{$session_id}','{$presenter_id}','{$created_date_time}',".$award.", '{$label}', ".$presentation_date.", ".$start_time.", ".$end_time.")");
                         $presentation_id = $this->db->insert_id();
                         $this->db->query("INSERT INTO `admin_logs`(`admin_id`, `log_name`, `log_desc`, `ref_presentation_id`, `other_ref`, `date_time`) VALUES ( '{$admin_id}', 'Created presentation', null, '{$presentation_id}', null, '{$created_date_time}')");
                         $createdPresentations = $createdPresentations+1;
@@ -397,4 +451,62 @@ class Dashboard extends CI_Controller
         return false;
     }
 
+//    private function check_upload_label($label){
+//        $this->db->select('*')
+//            ->from('upload_label')
+//            ->where('name', $label)
+//            ;
+//        $result = $this->db->get();
+//        if($result->num_rows() > 0){
+//            return $result->result()[0];
+//        }
+//    }
+
+    public function presentationToCsv(){
+        $this->db->select('p.id,CONCAT(pr.first_name ," ", pr.last_name) as PresenterName, pr.email as email, l.name as LabelName, s.name as Category, p.name as PresentationName')
+            ->from('presentations p ')
+            ->join('upload_label l', 'p.label=l.id', 'left')
+            ->join('sessions s', 'p.session_id = s.id', 'left')
+            ->join('presenter pr', 'p.presenter_id = pr.presenter_id', 'left')
+            ;
+        $result = $this->db->get();
+
+        if($result->num_rows() > 0){
+            $filename = 'PresentationExport'.date('Y-m-d').'.csv';
+
+            header("Content-Description: File Transfer");
+            header("Content-Disposition: attachment; filename = $filename");
+            header("Content-Type: application/csv;");
+
+            $file = fopen('php://output', 'w');
+            $header = array("id", "Presenter", "Email", "Label", "Category", "Presentation Title", "Status");
+            fputcsv($file, $header);
+            $data_array= array();
+            foreach($result->result_array() as $data){
+                $data['get_uploads'] = $this->get_uploads($data['id']);
+                fputcsv($file, $data);
+            }
+            fclose($file);
+            exit;
+        }else{
+            return '';
+        }
+
+    }
+
+    function get_uploads($presentation_id){
+        $this->db->select('count(*) as count')
+            ->from('uploads')
+            ->where('presentation_id', $presentation_id)
+            ;
+        $result = $this->db->get();
+        if($result->num_rows() > 0){
+            if($result->result()[0]->count <= 0 ){
+                return 'No Data/File uploaded';
+            }else{
+                return $result->result()[0]->count.' Data/File uploaded';
+            }
+
+        }
+    }
 }
