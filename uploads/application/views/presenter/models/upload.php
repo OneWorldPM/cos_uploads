@@ -177,6 +177,7 @@
                 url: "<?=base_url('dashboard/uploadFile')?>",
                 acceptedFiles: ".ppt, .pptx, .mp4, .mp3, .mv4, .mpg",
                 addRemoveLinks: false,
+                timeout: 60*60000, // minutes * 60000 (milliseconds)
                 init: function() {
                     this.on('error', function(file, errorMessage) {
                         var errorDisplay = document.querySelectorAll('[data-dz-errormessage]');
