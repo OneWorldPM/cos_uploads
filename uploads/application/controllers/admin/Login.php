@@ -30,7 +30,7 @@ class Login extends CI_Controller
         $this->db->select('*');
         $this->db->from('admin');
         $this->db->where("email", $post['email']);
-        $this->db->where("BINARY password", $password);
+        $this->db->where("password", $password);
         $result = $this->db->get();
 
         if ($result->num_rows() > 0) {

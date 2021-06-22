@@ -25,10 +25,12 @@ class Login extends CI_Controller
     {
         $post = $this->input->post();
 
+        $password = trim($post['password']);
+
         $this->db->select('*');
         $this->db->from('presenter');
         $this->db->where("email", $post['email']);
-        $this->db->where("password", $post['password']);
+        $this->db->where("password", $password);
         $result = $this->db->get();
 
         if ($result->num_rows() > 0) {
